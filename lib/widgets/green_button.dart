@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../theme/colors.dart';
+import '../theme/styles.dart';
 
 /// Boutons verts réutilisables (remplis et contours) basés sur le thème.
 ///
@@ -15,7 +17,6 @@ class GreenButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(10));
     final resolvedPadding = padding ?? const EdgeInsets.symmetric(vertical: 16, horizontal: 24);
 
@@ -23,8 +24,8 @@ class GreenButton extends StatelessWidget {
       return OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          foregroundColor: colorScheme.primary,
-          side: BorderSide(color: colorScheme.primary, width: 1.5),
+          foregroundColor: AppColors.primaryGreen,
+          side: const BorderSide(color: AppColors.primaryGreen, width: 1.5),
           shape: shape,
           padding: resolvedPadding,
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -33,15 +34,13 @@ class GreenButton extends StatelessWidget {
       );
     }
 
-    return FilledButton(
+    final buttonStyle = AppStyles.greenButton.copyWith(
+      padding: MaterialStateProperty.all(resolvedPadding),
+    );
+
+    return ElevatedButton(
       onPressed: onPressed,
-      style: FilledButton.styleFrom(
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-        shape: shape,
-        padding: resolvedPadding,
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-      ),
+      style: buttonStyle,
       child: child,
     );
   }
