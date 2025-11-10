@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
+import 'utils/navigation_helper.dart';
 import 'services/auth_service.dart';
 import 'theme/colors.dart';
 import 'theme/styles.dart';
@@ -20,6 +20,17 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: AppColors.primaryGreen,
         scaffoldBackgroundColor: AppColors.background,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.primaryGreen,
+          primary: AppColors.primaryGreen,
+          secondary: AppColors.lightGreen,
+          surface: AppColors.background,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: AppColors.primaryGreen,
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: AppColors.background,
@@ -35,6 +46,22 @@ class MyApp extends StatelessWidget {
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: AppStyles.greenButton,
         ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          selectedItemColor: AppColors.primaryGreen,
+          unselectedItemColor: Colors.grey,
+        ),
+        navigationBarTheme: const NavigationBarThemeData(
+          indicatorColor: AppColors.lightGreen,
+          labelTextStyle: MaterialStatePropertyAll(TextStyle(color: AppColors.primaryGreen)),
+          iconTheme: MaterialStatePropertyAll(IconThemeData(color: AppColors.primaryGreen)),
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: AppColors.primaryGreen,
+          foregroundColor: Colors.white,
+        ),
+        progressIndicatorTheme: const ProgressIndicatorThemeData(
+          color: AppColors.primaryGreen,
+        ),
       ),
       home: FutureBuilder<bool>(
         future: AuthService.isLoggedIn(),
@@ -44,7 +71,21 @@ class MyApp extends StatelessWidget {
               body: Center(child: CircularProgressIndicator()),
             );
           }
-          return snapshot.data! ? const HomeScreen() : const LoginScreen();
+          if (snapshot.data!) {
+            // Utilisateur connecté, rediriger vers la page appropriée selon le rôle
+            return FutureBuilder<Widget>(
+              future: NavigationHelper.getHomePage(),
+              builder: (context, homeSnapshot) {
+                if (!homeSnapshot.hasData) {
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return homeSnapshot.data!;
+              },
+            );
+          }
+          return const LoginScreen();
         },
       ),
     );
