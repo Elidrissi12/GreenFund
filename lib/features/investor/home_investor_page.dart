@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../models/project.dart';
 import '../../widgets/green_button.dart';
+import '../../services/api_service.dart';
+import '../../theme/colors.dart';
 import '../common/profile_page.dart';
 import '../common/settings_page.dart';
 import 'investments_page.dart';
 import 'project_detail_page.dart';
 
-/// Accueil investisseur avec NavigationBar (Projets / Compte) et liste mock.
+/// Accueil investisseur avec NavigationBar (Projets / Compte) et liste depuis API.
 class HomeInvestorPage extends StatefulWidget {
   const HomeInvestorPage({super.key});
 
@@ -16,41 +18,40 @@ class HomeInvestorPage extends StatefulWidget {
 
 class _HomeInvestorPageState extends State<HomeInvestorPage> {
   int _index = 0;
+  List<Project> _projects = [];
+  bool _isLoading = true;
+  String? _error;
 
-  late final List<Project> _projects = [
-    const Project(
-      id: 'p1',
-      title: 'Panneaux solaires - Marrakech',
-      city: 'Marrakech',
-      energyType: 'Solaire',
-      description: 'Installation de 50 panneaux sur toits résidentiels.',
-      targetAmount: 120000,
-      raisedAmount: 45000,
-    ),
-    const Project(
-      id: 'p2',
-      title: 'Mini-éolienne - Agadir',
-      city: 'Agadir',
-      energyType: 'Éolienne',
-      description: 'Éolienne 5kW pour ferme coopérative.',
-      targetAmount: 80000,
-      raisedAmount: 30000,
-    ),
-    const Project(
-      id: 'p3',
-      title: 'Unité biogaz - Fès',
-      city: 'Fès',
-      energyType: 'Biogaz',
-      description: 'Valorisation des déchets organiques en énergie.',
-      targetAmount: 150000,
-      raisedAmount: 90000,
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadProjects();
+  }
+
+  Future<void> _loadProjects() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final projects = await ApiService.getProjects();
+      setState(() {
+        _projects = projects;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final pages = [
-      _ProjectsList(projects: _projects),
+      _ProjectsList(projects: _projects, isLoading: _isLoading, error: _error, onRefresh: _loadProjects),
       _AccountMenu(),
     ];
 
@@ -58,6 +59,11 @@ class _HomeInvestorPageState extends State<HomeInvestorPage> {
       appBar: AppBar(
         title: const Text('GreenFund'),
         actions: [
+          IconButton(
+            tooltip: 'Actualiser',
+            onPressed: _loadProjects,
+            icon: const Icon(Icons.refresh),
+          ),
           IconButton(
             tooltip: 'Investissements',
             onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const InvestmentsPage())),
@@ -81,9 +87,19 @@ class _HomeInvestorPageState extends State<HomeInvestorPage> {
       body: pages[_index],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
+        indicatorColor: AppColors.lightGreen,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         destinations: const [
-          NavigationDestination(icon: Icon(Icons.bolt), label: 'Projets'),
-          NavigationDestination(icon: Icon(Icons.account_circle), label: 'Compte'),
+          NavigationDestination(
+            icon: Icon(Icons.bolt),
+            selectedIcon: Icon(Icons.bolt, color: AppColors.primaryGreen),
+            label: 'Projets',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.account_circle),
+            selectedIcon: Icon(Icons.account_circle, color: AppColors.primaryGreen),
+            label: 'Compte',
+          ),
         ],
         onDestinationSelected: (i) => setState(() => _index = i),
       ),
@@ -93,47 +109,84 @@ class _HomeInvestorPageState extends State<HomeInvestorPage> {
 
 class _ProjectsList extends StatelessWidget {
   final List<Project> projects;
-  const _ProjectsList({required this.projects});
+  final bool isLoading;
+  final String? error;
+  final VoidCallback onRefresh;
+  
+  const _ProjectsList({
+    required this.projects,
+    required this.isLoading,
+    this.error,
+    required this.onRefresh,
+  });
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: ListView.separated(
-        itemCount: projects.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemBuilder: (context, i) {
-          final p = projects[i];
-          return Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => ProjectDetailPage(project: p)));
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(p.title, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                      subtitle: Text('${p.energyType} • ${p.city}', style: textTheme.bodySmall),
-                      trailing: const Text('Voir'),
-                    ),
-                    const SizedBox(height: 8),
-                    LinearProgressIndicator(value: p.progress),
-                    const SizedBox(height: 8),
-                    Text('${p.raisedAmount.toStringAsFixed(0)} / ${p.targetAmount.toStringAsFixed(0)} MAD', style: textTheme.bodySmall),
-                  ],
+    
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    
+    if (error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Erreur: $error'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: onRefresh,
+              child: const Text('Réessayer'),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    if (projects.isEmpty) {
+      return const Center(child: Text('Aucun projet disponible'));
+    }
+    
+    return RefreshIndicator(
+      onRefresh: () async => onRefresh(),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ListView.separated(
+          itemCount: projects.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, i) {
+            final p = projects[i];
+            return Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => ProjectDetailPage(project: p)));
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(p.title, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                        subtitle: Text('${p.energyType} • ${p.city}', style: textTheme.bodySmall),
+                        trailing: const Text('Voir'),
+                      ),
+                      const SizedBox(height: 8),
+                      LinearProgressIndicator(value: p.progress),
+                      const SizedBox(height: 8),
+                      Text('${p.raisedAmount.toStringAsFixed(0)} / ${p.targetAmount.toStringAsFixed(0)} MAD', style: textTheme.bodySmall),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

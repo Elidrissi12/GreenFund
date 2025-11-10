@@ -12,8 +12,20 @@ class GreenTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
   final TextInputAction? textInputAction;
+  final int? maxLines;
+  final bool? enabled;
 
-  const GreenTextField({super.key, required this.controller, required this.label, this.obscureText = false, this.keyboardType, this.validator, this.textInputAction});
+  const GreenTextField({
+    super.key,
+    required this.controller,
+    required this.label,
+    this.obscureText = false,
+    this.keyboardType,
+    this.validator,
+    this.textInputAction,
+    this.maxLines,
+    this.enabled,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +36,8 @@ class GreenTextField extends StatelessWidget {
       keyboardType: keyboardType,
       textInputAction: textInputAction,
       validator: validator,
+      maxLines: maxLines ?? 1,
+      enabled: enabled,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -34,6 +48,10 @@ class GreenTextField extends StatelessWidget {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
       ),

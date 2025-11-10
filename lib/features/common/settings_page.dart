@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../services/auth_service.dart';
+import '../../screens/login_screen.dart';
+import '../../theme/colors.dart';
 
-/// Paramètres (squelette): dark mode mock, langue FR/EN, notifications TODO, déconnexion TODO.
+/// Page des paramètres avec déconnexion fonctionnelle.
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
@@ -27,6 +30,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: const Text('Français'),
                   value: 'FR',
                   groupValue: selected,
+                  activeColor: AppColors.primaryGreen,
                   onChanged: (v) {
                     setState(() => selected = v);
                     Navigator.pop(ctx, v);
@@ -36,6 +40,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: const Text('Anglais'),
                   value: 'EN',
                   groupValue: selected,
+                  activeColor: AppColors.primaryGreen,
                   onChanged: (v) {
                     setState(() => selected = v);
                     Navigator.pop(ctx, v);
@@ -49,7 +54,49 @@ class _SettingsPageState extends State<SettingsPage> {
     );
     if (result != null) {
       setState(() => _lang = result);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Langue réglée sur $_lang (mock)')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Langue réglée sur ${result == 'FR' ? 'Français' : 'Anglais'}'),
+          backgroundColor: AppColors.primaryGreen,
+        ),
+      );
+    }
+  }
+
+  void _logout() async {
+    // Afficher une boîte de dialogue de confirmation
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Déconnexion'),
+        content: const Text('Êtes-vous sûr de vouloir vous déconnecter ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primaryGreen,
+            ),
+            child: const Text('Déconnexion'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      // Déconnecter l'utilisateur
+      await AuthService.logout();
+      
+      // Naviguer vers la page de connexion
+      if (context.mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+        );
+      }
     }
   }
 
@@ -66,9 +113,15 @@ class _SettingsPageState extends State<SettingsPage> {
             child: SwitchListTile(
               title: const Text('Mode sombre'),
               value: _darkMode,
+              activeColor: AppColors.primaryGreen,
               onChanged: (v) {
                 setState(() => _darkMode = v);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mode sombre basculé (mock)')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Mode sombre ${v ? 'activé' : 'désactivé'} (mock)'),
+                    backgroundColor: AppColors.primaryGreen,
+                  ),
+                );
               },
             ),
           ),
@@ -96,9 +149,11 @@ class _SettingsPageState extends State<SettingsPage> {
           Card(
             elevation: 2,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: const ListTile(
-              title: Text('Déconnexion'),
-              subtitle: Text('TODO'),
+            child: ListTile(
+              title: const Text('Déconnexion'),
+              subtitle: const Text('Se déconnecter de votre compte'),
+              trailing: const Icon(Icons.logout, color: AppColors.primaryGreen),
+              onTap: _logout,
             ),
           ),
         ],

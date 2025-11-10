@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/project.dart';
 import '../../widgets/green_button.dart';
+import '../../services/api_service.dart';
 
 /// Détails d'un projet avec progression et action Financer (bottom sheet).
 class ProjectDetailPage extends StatelessWidget {
@@ -54,8 +55,36 @@ class ProjectDetailPage extends StatelessWidget {
     );
 
     if (amount != null && amount > 0) {
-      // TODO: appeler API d'investissement
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Investissement de ${amount.toStringAsFixed(0)} MAD enregistré (mock)')));
+      try {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(child: CircularProgressIndicator()),
+        );
+        
+        await ApiService.investInProject(project.id, amount);
+        
+        Navigator.pop(context); // Fermer le loading
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Investissement de ${amount.toStringAsFixed(0)} MAD enregistré avec succès !'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        
+        // Rafraîchir les données du projet si nécessaire
+        Navigator.pop(context); // Fermer la page de détails
+      } catch (e) {
+        Navigator.pop(context); // Fermer le loading
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de l\'investissement: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
