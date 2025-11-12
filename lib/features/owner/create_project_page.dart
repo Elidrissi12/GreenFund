@@ -17,7 +17,7 @@ class _CreateProjectPageState extends State<CreateProjectPage> {
   final _city = TextEditingController();
   final _description = TextEditingController();
   final _target = TextEditingController();
-  String _energy = 'Solaire';
+  String _energy = 'SOLAIRE';
 
   @override
   void dispose() {
@@ -95,11 +95,11 @@ class _CreateProjectPageState extends State<CreateProjectPage> {
                 value: _energy,
                 decoration: const InputDecoration(border: OutlineInputBorder(), labelText: 'Type d\'énergie'),
                 items: const [
-                  DropdownMenuItem(value: 'Solaire', child: Text('Solaire')),
-                  DropdownMenuItem(value: 'Éolienne', child: Text('Éolienne')),
-                  DropdownMenuItem(value: 'Biogaz', child: Text('Biogaz')),
+                  DropdownMenuItem(value: 'SOLAIRE', child: Text('Solaire')),
+                  DropdownMenuItem(value: 'EOLIENNE', child: Text('Éolienne')),
+                  DropdownMenuItem(value: 'BIOGAZ', child: Text('Biogaz')),
                 ],
-                onChanged: (v) => setState(() => _energy = v ?? 'Solaire'),
+                onChanged: (v) => setState(() => _energy = v ?? 'SOLAIRE'),
               ),
               const SizedBox(height: 12),
               GreenTextField(
