@@ -5,6 +5,8 @@ import '../../models/project.dart';
 import 'create_project_page.dart';
 import 'edit_project_page.dart';
 import 'fundings_received_page.dart';
+import '../../services/auth_service.dart';
+import '../../screens/login_screen.dart';
 
 /// Accueil Porteur: navigation vers les écrans du module.
 class HomeOwnerPage extends StatefulWidget {
@@ -68,6 +70,37 @@ class _HomeOwnerPageState extends State<HomeOwnerPage> {
     }
   }
 
+  Future<void> _logout() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Déconnexion'),
+        content: const Text('Voulez-vous quitter l\'espace porteur ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.primary),
+            child: const Text('Déconnexion'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await AuthService.logout();
+      if (context.mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,6 +110,11 @@ class _HomeOwnerPageState extends State<HomeOwnerPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadProjects,
+          ),
+          IconButton(
+            tooltip: 'Déconnexion',
+            onPressed: _logout,
+            icon: const Icon(Icons.logout),
           ),
         ],
       ),
