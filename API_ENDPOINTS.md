@@ -68,7 +68,7 @@ Authorization: Bearer <token>
 ## 📦 Projets (Authentifié)
 
 ### GET /api/projects
-**Description :** Liste de tous les projets
+**Description :** Liste des projets (public)
 
 **Query Parameters :**
 - `status` (optionnel) : PENDING, APPROVED, REJECTED, ACTIVE, COMPLETED, CANCELLED
@@ -90,6 +90,42 @@ Authorization: Bearer <token>
     "ownerName": "Ahmed Benali",
     "createdAt": "2024-01-15T10:00:00",
     "updatedAt": "2024-01-20T15:30:00"
+  }
+]
+```
+
+### GET /api/projects/search
+**Description :** Recherche de projets avec filtres (public)
+
+**Query Params :**
+```
+keyword          (optionnel) - recherche sur titre / description / ville
+city             (optionnel)
+energyType       (optionnel) - SOLAIRE | EOLIENNE | BIOGAZ
+status           (optionnel) - PENDING | APPROVED | ACTIVE | COMPLETED | CANCELLED | REJECTED
+minTargetAmount  (optionnel) - Montant cible minimum (nombre)
+maxTargetAmount  (optionnel) - Montant cible maximum (nombre)
+minRaisedAmount  (optionnel) - Montant levé minimum (nombre)
+maxRaisedAmount  (optionnel) - Montant levé maximum (nombre)
+```
+
+**Réponse :**
+```json
+[
+  {
+    "id": 1,
+    "title": "Parc solaire Casablanca",
+    "city": "Casablanca",
+    "energyType": "SOLAIRE",
+    "description": "Installation de panneaux solaires",
+    "targetAmount": 100000.00,
+    "raisedAmount": 45000.00,
+    "progress": 45.0,
+    "status": "APPROVED",
+    "ownerId": 2,
+    "ownerName": "Owner Name",
+    "createdAt": "2024-01-01T10:00:00",
+    "updatedAt": "2024-01-05T09:00:00"
   }
 ]
 ```

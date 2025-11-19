@@ -93,15 +93,58 @@ class ApiService {
   }
 
   // Projects
-  static Future<List<Project>> getProjects({String? status}) async {
+  static Future<List<Project>> getProjects({
+    String? status,
+    String? keyword,
+    String? city,
+    String? energyType,
+    String? projectStatus,
+    double? minTargetAmount,
+    double? maxTargetAmount,
+    double? minRaisedAmount,
+    double? maxRaisedAmount,
+  }) async {
     try {
       final headers = await _getHeaders();
-      final url = status != null 
-          ? '$baseUrl/projects?status=$status'
-          : '$baseUrl/projects';
-      
+      final Map<String, String> filters = {};
+
+      String? effectiveStatus = projectStatus ?? status;
+      if (effectiveStatus != null && effectiveStatus.isNotEmpty) {
+        filters['status'] = effectiveStatus.toUpperCase();
+      }
+      if (keyword != null && keyword.trim().isNotEmpty) {
+        filters['keyword'] = keyword.trim();
+      }
+      if (city != null && city.trim().isNotEmpty) {
+        filters['city'] = city.trim();
+      }
+      if (energyType != null && energyType.trim().isNotEmpty) {
+        filters['energyType'] = energyType.trim().toUpperCase();
+      }
+      if (minTargetAmount != null) {
+        filters['minTargetAmount'] = minTargetAmount.toString();
+      }
+      if (maxTargetAmount != null) {
+        filters['maxTargetAmount'] = maxTargetAmount.toString();
+      }
+      if (minRaisedAmount != null) {
+        filters['minRaisedAmount'] = minRaisedAmount.toString();
+      }
+      if (maxRaisedAmount != null) {
+        filters['maxRaisedAmount'] = maxRaisedAmount.toString();
+      }
+
+      Uri uri;
+      if (filters.isEmpty) {
+        uri = Uri.parse('$baseUrl/projects');
+      } else if (filters.keys.length == 1 && filters.containsKey('status')) {
+        uri = Uri.parse('$baseUrl/projects?status=${filters['status']}');
+      } else {
+        uri = Uri.parse('$baseUrl/projects/search').replace(queryParameters: filters);
+      }
+
       final response = await http.get(
-        Uri.parse(url),
+        uri,
         headers: headers,
       );
 
