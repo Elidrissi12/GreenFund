@@ -22,15 +22,19 @@ class AccountFragment extends StatelessWidget {
         title: const Text('Mon Compte'),
         backgroundColor: AppColors.primaryGreen,
       ),
-      body: Center(
-        child: SizedBox(
-          width: 200,
-          child: ElevatedButton(
-            onPressed: () => _logout(context),
-            style: AppStyles.greenButton,
-            child: const Text('Se déconnecter'),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Bouton de déconnexion
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => _logout(context),
+              style: AppStyles.greenButton,
+              child: const Text('Se déconnecter'),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

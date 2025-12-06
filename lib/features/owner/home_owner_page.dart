@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/green_button.dart';
 import '../../services/api_service.dart';
 import '../../models/project.dart';
+import '../../theme/colors.dart';
 import 'create_project_page.dart';
 import 'edit_project_page.dart';
 import 'fundings_received_page.dart';
@@ -101,6 +102,32 @@ class _HomeOwnerPageState extends State<HomeOwnerPage> {
     }
   }
 
+  IconData _getEnergyIcon(String energy) {
+    switch (energy.toUpperCase()) {
+      case 'SOLAIRE':
+        return Icons.wb_sunny;
+      case 'EOLIENNE':
+        return Icons.air;
+      case 'BIOGAZ':
+        return Icons.local_gas_station;
+      default:
+        return Icons.energy_savings_leaf;
+    }
+  }
+
+  Color _getEnergyColor(String energy) {
+    switch (energy.toUpperCase()) {
+      case 'SOLAIRE':
+        return const Color(0xFFFFC107);
+      case 'EOLIENNE':
+        return const Color(0xFF2196F3);
+      case 'BIOGAZ':
+        return const Color(0xFF9C27B0);
+      default:
+        return AppColors.primaryGreen;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -110,6 +137,7 @@ class _HomeOwnerPageState extends State<HomeOwnerPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadProjects,
+            tooltip: 'Actualiser',
           ),
           IconButton(
             tooltip: 'Déconnexion',
@@ -118,106 +146,335 @@ class _HomeOwnerPageState extends State<HomeOwnerPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            GreenButton(
-              onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const CreateProjectPage()),
-                );
-                _loadProjects(); // Rafraîchir après création
-              },
-              child: const Text('Créer un projet'),
-            ),
-            const SizedBox(height: 12),
-            GreenButton(
-              outlined: true,
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const FundingsReceivedPage()),
+      body: RefreshIndicator(
+        onRefresh: _loadProjects,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Section des actions principales
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: AppColors.cardGradient,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: AppColors.cardShadow,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: AppColors.primaryGradient,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primaryGreen.withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const CreateProjectPage()),
+                          );
+                          _loadProjects();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        icon: const Icon(Icons.add_circle_outline, color: Colors.white, size: 24),
+                        label: const Text(
+                          'Créer un projet',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.primaryGreen, width: 2),
+                      ),
+                      child: ElevatedButton.icon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const FundingsReceivedPage()),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        icon: Icon(Icons.account_balance_wallet, color: AppColors.primaryGreen, size: 24),
+                        label: Text(
+                          'Financements reçus',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryGreen,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: const Text('Financements reçus'),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Mes projets',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
+              const SizedBox(height: 24),
+              // Titre de section
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryGreen.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.folder_special, color: AppColors.primaryGreen),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Mes projets',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (_projects.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryGreen.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${_projects.length}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryGreen,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // Liste des projets
+              _isLoading
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(40),
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
                   : _error != null
-                      ? Center(
+                      ? Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: AppColors.cardShadow,
+                          ),
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('Erreur: $_error'),
+                              Icon(
+                                Icons.error_outline,
+                                size: 64,
+                                color: AppColors.errorRed,
+                              ),
                               const SizedBox(height: 16),
+                              Text(
+                                'Erreur',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textDark,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                _error!,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: AppColors.textMedium),
+                              ),
+                              const SizedBox(height: 24),
                               ElevatedButton(
                                 onPressed: _loadProjects,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primaryGreen,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                                ),
                                 child: const Text('Réessayer'),
                               ),
                             ],
                           ),
                         )
                       : _projects.isEmpty
-                          ? const Center(child: Text('Aucun projet créé'))
-                          : RefreshIndicator(
-                              onRefresh: _loadProjects,
-                              child: ListView.separated(
-                                itemCount: _projects.length,
-                                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                                itemBuilder: (context, i) {
-                                  final project = _projects[i];
-                                  return Card(
-                                    elevation: 2,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: ListTile(
-                                      title: Text(
-                                        project.title,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium
-                                            ?.copyWith(fontWeight: FontWeight.bold),
-                                      ),
-                                      subtitle: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text('${project.city} - ${project.energyType}'),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            '${project.raisedAmount.toStringAsFixed(0)} / ${project.targetAmount.toStringAsFixed(0)} MAD',
-                                            style: TextStyle(
-                                              color: Theme.of(context).primaryColor,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      trailing: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          IconButton(
-                                            icon: const Icon(Icons.edit),
-                                            onPressed: () => _editProject(project),
-                                            tooltip: 'Modifier',
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
+                          ? Container(
+                              padding: const EdgeInsets.all(40),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: AppColors.cardShadow,
                               ),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.inbox_outlined,
+                                    size: 64,
+                                    color: AppColors.textLight,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Aucun projet créé',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textDark,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Créez votre premier projet pour commencer',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: AppColors.textMedium),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Column(
+                              children: _projects.map((project) {
+                                final energyColor = _getEnergyColor(project.energyType);
+                                final energyIcon = _getEnergyIcon(project.energyType);
+                                final progressPercent = (project.progress * 100).toStringAsFixed(0);
+                                
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  decoration: BoxDecoration(
+                                    gradient: AppColors.cardGradient,
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: AppColors.cardShadow,
+                                  ),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(20),
+                                      onTap: () => _editProject(project),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  padding: const EdgeInsets.all(10),
+                                                  decoration: BoxDecoration(
+                                                    color: energyColor.withOpacity(0.1),
+                                                    borderRadius: BorderRadius.circular(12),
+                                                  ),
+                                                  child: Icon(energyIcon, color: energyColor, size: 24),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(
+                                                        project.title,
+                                                        style: const TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: AppColors.textDark,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 4),
+                                                      Row(
+                                                        children: [
+                                                          Icon(Icons.location_on, size: 14, color: AppColors.textMedium),
+                                                          const SizedBox(width: 4),
+                                                          Text(
+                                                            '${project.city} • ${project.energyType}',
+                                                            style: TextStyle(
+                                                              fontSize: 14,
+                                                              color: AppColors.textMedium,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(Icons.edit),
+                                                  onPressed: () => _editProject(project),
+                                                  tooltip: 'Modifier',
+                                                  color: AppColors.primaryGreen,
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 16),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text(
+                                                  '$progressPercent% financé',
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: AppColors.primaryGreen,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  '${project.raisedAmount.toStringAsFixed(0)} / ${project.targetAmount.toStringAsFixed(0)} MAD',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: AppColors.textMedium,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 8),
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(8),
+                                              child: LinearProgressIndicator(
+                                                value: project.progress,
+                                                minHeight: 8,
+                                                backgroundColor: AppColors.lightGreen,
+                                                valueColor: AlwaysStoppedAnimation<Color>(energyColor),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
                             ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/project_card.dart';
 import '../theme/colors.dart';
 import '../features/investor/home_investor_page.dart';
+import '../features/investor/project_detail_page.dart';
 import '../features/owner/home_owner_page.dart';
 import '../features/admin/home_admin_page.dart';
 import '../services/api_service.dart';
@@ -290,12 +291,26 @@ class _ProjectsFragmentState extends State<ProjectsFragment> {
                   : RefreshIndicator(
                       onRefresh: _loadProjects,
                       child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                         itemCount: _projects.length,
                         itemBuilder: (context, i) {
                           final project = _projects[i];
                           return ProjectCard(
                             title: project.title,
                             energy: project.energyType,
+                            city: project.city,
+                            progress: project.progress,
+                            raisedAmount: project.raisedAmount,
+                            targetAmount: project.targetAmount,
+                            onTap: () {
+                              // Navigation vers la page de détails
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ProjectDetailPage(project: project),
+                                ),
+                              );
+                            },
                           );
                         },
                       ),

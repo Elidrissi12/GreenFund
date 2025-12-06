@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/project.dart';
 import '../../widgets/green_button.dart';
+import '../../widgets/project_card.dart';
 import '../../services/api_service.dart';
 import '../../theme/colors.dart';
 import '../common/profile_page.dart';
@@ -352,38 +353,24 @@ class _ProjectsList extends StatelessWidget {
       onRefresh: () async => onRefresh(),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: ListView.separated(
+        child: ListView.builder(
+          padding: const EdgeInsets.symmetric(vertical: 8),
           itemCount: projects.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
           itemBuilder: (context, i) {
             final p = projects[i];
-            return Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => ProjectDetailPage(project: p)));
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(p.title, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                        subtitle: Text('${p.energyType} • ${p.city}', style: textTheme.bodySmall),
-                        trailing: const Text('Voir'),
-                      ),
-                      const SizedBox(height: 8),
-                      LinearProgressIndicator(value: p.progress),
-                      const SizedBox(height: 8),
-                      Text('${p.raisedAmount.toStringAsFixed(0)} / ${p.targetAmount.toStringAsFixed(0)} MAD', style: textTheme.bodySmall),
-                    ],
-                  ),
-                ),
-              ),
+            return ProjectCard(
+              title: p.title,
+              energy: p.energyType,
+              city: p.city,
+              progress: p.progress,
+              raisedAmount: p.raisedAmount,
+              targetAmount: p.targetAmount,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ProjectDetailPage(project: p)),
+                );
+              },
             );
           },
         ),

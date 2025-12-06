@@ -23,13 +23,20 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: AppColors.primaryGreen,
           primary: AppColors.primaryGreen,
-          secondary: AppColors.lightGreen,
-          surface: AppColors.background,
+          secondary: AppColors.accentGreen,
+          surface: AppColors.surface,
+          background: AppColors.background,
         ),
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           backgroundColor: AppColors.primaryGreen,
           foregroundColor: Colors.white,
           elevation: 0,
+          centerTitle: false,
+          titleTextStyle: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
