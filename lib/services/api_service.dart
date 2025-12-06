@@ -69,6 +69,25 @@ class ApiService {
     }
   }
 
+  // User Profile
+  static Future<Map<String, dynamic>> getUserProfile() async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.get(
+        Uri.parse('$baseUrl/auth/me'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to load user profile: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error loading user profile: $e');
+    }
+  }
+
   static Future<Map<String, dynamic>> register(String name, String email, String password, String role) async {
     try {
       final response = await http.post(
@@ -422,5 +441,6 @@ class ApiService {
       throw Exception('Error loading transactions: $e');
     }
   }
+
 }
 
