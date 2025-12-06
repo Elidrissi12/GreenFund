@@ -1,48 +1,76 @@
-# Guide pratique GreenFund - Respect du thème
+# GreenFund - Application Flutter
+
+Plateforme de micro-financement pour projets d'énergies renouvelables locales.
+
+## Fonctionnalités
+- Authentification (Login/Register)
+- Gestion de projets (Investisseur, Porteur, Admin)
+- Système d'investissement
+- Tableau de bord administrateur
+- Statistiques en temps réel
+## Prérequis
+
+- Flutter SDK >= 3.0.0
+- Dart SDK >= 3.0.0
+- Android Studio / VS Code avec extensions Flutter
+- Un émulateur Android/iOS ou un appareil physique
+- Backend Spring Boot en cours d'exécution (port 8080)
+## Installation
+
+1. Cloner le repository
+git clone [url-du-repo]
+cd GreenFund2. Installer les dépendances
+flutter pub get3. Vérifier l'installation
+flutter doctor
 
 
-## 1️⃣ Règles importantes
-1. **Ne jamais modifier** les fichiers dans `lib/theme/` (colors.dart, styles.dart).
-2. **Ne jamais modifier** `main.dart`.
-3. Toutes les pages et widgets doivent **utiliser les couleurs et styles définis** dans `AppColors` et `AppStyles`.
+### 4. **Configuration**
+## Configuration
 
-![Login Screen](githubImages/Screenshot.jpg)
----
+### Configuration de l'API
 
-## 2️⃣ Couleurs à utiliser
-- `AppColors.primaryGreen` → boutons, accents
-- `AppColors.lightGreen` → bordures, fonds légers
-- `AppColors.darkGreen` → textes secondaires ou hover
-- `AppColors.background` → fond global des écrans
-- `AppColors.textDark` / `AppColors.textLight` → texte principal / texte clair
+L'URL de l'API est configurée dans `lib/services/api_service.dart` :
 
-⚠️ Ne jamais utiliser `Color(0xFF...)` directement dans vos pages.
+- **Web** : `http://localhost:8080/api`
+- **Android Emulator** : `http://10.0.2.2:8080/api`
+- **iOS Simulator** : `http://localhost:8080/api`
+- **Appareil physique** : Utiliser l'IP de votre machine (ex: `http://192.168.x.x:8080/api`)
 
----
-
-## 3️⃣ Styles à utiliser
-## exemple
-# import '../theme/colors.dart';
-# import '../theme/styles.dart';
-
-```dart
-TextField(
-  controller: myController,
-  decoration: AppStyles.inputDecoration('Nom du champ'),
-)
-ElevatedButton(
-  style: AppStyles.greenButton,
-  onPressed: () {},
-  child: Text('Valider'),
-)
-Card(
-  shape: AppStyles.projectCardTheme.shape,
-  elevation: AppStyles.projectCardTheme.elevation,
-  margin: AppStyles.projectCardTheme.margin,
-  child: ListTile(
-    title: Text('Projet solaire', style: AppStyles.titleText),
-    subtitle: Text('Type: Solaire', style: AppStyles.subtitleText),
-  ),
-)
+Pour modifier l'URL, éditez la méthode `baseUrl` dans `api_service.dart`.
 
 
+
+### 6. **Structure du projet**
+## Structure du projet
+
+s fichiers dans `lib/theme/` (colors.dart, styles.dart)
+2. **Ne jamais modifier** `main.dart`
+3. Utiliser **uniquement** `AppColors` et `AppStyles` pour les couleurs et styles
+4. Suivre la structure de dossiers existante
+5. Ajouter des commentaires pour les fonctions complexes
+
+
+## Build et déploiement
+
+### Android APK
+flutter build apk --releaseLe fichier APK sera dans `build/app/outputs/flutter-apk/app-release.apk`
+
+### Android App Bundle (pour Google Play)
+flutter build appbundle --release### iOS
+flutter build ios --release
+
+## Comptes de test
+
+### Administrateur
+- Email: `admin@greenfund.com`
+- Mot de passe: `admin123`
+
+### Créer un compte
+Utilisez la page d'inscription pour créer un compte Investisseur ou Porteur de projet.
+
+## Contribution
+
+1. Créer une branche pour votre fonctionnalité
+2. Suivre les règles de style du projet
+3. Tester vos modifications
+4. Créer une pull request
