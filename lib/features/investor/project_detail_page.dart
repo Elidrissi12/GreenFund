@@ -115,12 +115,33 @@ class ProjectDetailPage extends StatelessWidget {
     }
   }
 
+  String _buildImageUrl(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
+      print('ProjectDetailPage - No imageUrl provided');
+      return '';
+    }
+    if (imageUrl.startsWith('http')) {
+      print('ProjectDetailPage - Using full URL: $imageUrl');
+      return imageUrl;
+    }
+    // Construire l'URL complète depuis l'URL de base
+    final baseUrl = ApiService.baseUrl.replaceAll('/api', '');
+    // S'assurer que imageUrl commence par /
+    final cleanUrl = imageUrl.startsWith('/') ? imageUrl : '/$imageUrl';
+    final fullUrl = '$baseUrl$cleanUrl';
+    print('ProjectDetailPage - Building image URL: $fullUrl (from: $imageUrl)');
+    return fullUrl;
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final energyColor = _getEnergyColor(project.energyType);
     final energyIcon = _getEnergyIcon(project.energyType);
     final progressPercent = (project.progress * 100).toStringAsFixed(0);
+    
+    // Debug: afficher les infos du projet
+    print('ProjectDetailPage - Project: ${project.title}, imageUrl: ${project.imageUrl}');
 
     return Scaffold(
       body: CustomScrollView(
@@ -129,20 +150,60 @@ class ProjectDetailPage extends StatelessWidget {
             expandedHeight: 200,
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      energyColor.withOpacity(0.8),
-                      energyColor,
-                    ],
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Image en arrière-plan
+                  if (project.imageUrl != null && project.imageUrl!.isNotEmpty)
+                    Image.network(
+                      _buildImageUrl(project.imageUrl),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        print('ProjectDetailPage - Image load error: $error');
+                        print('ProjectDetailPage - URL tried: ${_buildImageUrl(project.imageUrl)}');
+                        // Retourner null pour afficher le gradient en dessous
+                        return const SizedBox.shrink();
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          color: energyColor.withOpacity(0.3),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded / 
+                                    loadingProgress.expectedTotalBytes!
+                                  : null,
+                              color: Colors.white,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  // Gradient par défaut (affiché si pas d'image ou en overlay)
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: project.imageUrl != null && project.imageUrl!.isNotEmpty
+                            ? [
+                                Colors.black.withOpacity(0.3),
+                                Colors.black.withOpacity(0.5),
+                              ]
+                            : [
+                                energyColor.withOpacity(0.8),
+                                energyColor,
+                              ],
+                      ),
+                    ),
+                    child: project.imageUrl == null || project.imageUrl!.isEmpty
+                        ? Center(
+                            child: Icon(energyIcon, size: 80, color: Colors.white),
+                          )
+                        : const SizedBox.shrink(),
                   ),
-                ),
-                child: Center(
-                  child: Icon(energyIcon, size: 80, color: Colors.white),
-                ),
+                ],
               ),
             ),
           ),

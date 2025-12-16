@@ -12,6 +12,7 @@ class Project {
   final double raisedAmount; // Montant collecté (MAD)
   final String? status;
   final double? progressPercentage;
+  final String? imageUrl;
 
   Project({
     required this.id,
@@ -23,6 +24,7 @@ class Project {
     required this.raisedAmount,
     this.status,
     this.progressPercentage,
+    this.imageUrl,
   });
 
   /// Progression entre 0 et 1, clampée.
@@ -57,7 +59,14 @@ class Project {
               ? (json['progress'] as int).toDouble()
               : (json['progress'] as num).toDouble()
           : null,
+      imageUrl: json['imageUrl'],
     );
+  }
+
+  // Méthode de debug pour vérifier les données
+  @override
+  String toString() {
+    return 'Project(id: $id, title: $title, imageUrl: $imageUrl)';
   }
 
   /// Convertir en JSON
@@ -72,6 +81,7 @@ class Project {
       'raisedAmount': raisedAmount,
       'status': status,
       'progress': progressPercentage,
+      'imageUrl': imageUrl,
     };
   }
 
@@ -85,6 +95,7 @@ class Project {
     double? raisedAmount,
     String? status,
     double? progressPercentage,
+    String? imageUrl,
   }) {
     return Project(
       id: id ?? this.id,
@@ -96,6 +107,7 @@ class Project {
       raisedAmount: raisedAmount ?? this.raisedAmount,
       status: status ?? this.status,
       progressPercentage: progressPercentage ?? this.progressPercentage,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 }

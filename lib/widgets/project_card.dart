@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:io';
 import '../theme/colors.dart';
+import '../services/api_service.dart';
 
 class ProjectCard extends StatelessWidget {
   final String title;
@@ -8,6 +11,7 @@ class ProjectCard extends StatelessWidget {
   final double? progress;
   final double? raisedAmount;
   final double? targetAmount;
+  final String? imageUrl;
   final VoidCallback? onTap;
 
   const ProjectCard({
@@ -18,6 +22,7 @@ class ProjectCard extends StatelessWidget {
     this.progress,
     this.raisedAmount,
     this.targetAmount,
+    this.imageUrl,
     this.onTap,
   });
 
@@ -47,6 +52,22 @@ class ProjectCard extends StatelessWidget {
     }
   }
 
+  String _buildImageUrl(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return '';
+    }
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    // Construire l'URL complète depuis l'URL de base
+    final baseUrl = ApiService.baseUrl.replaceAll('/api', '');
+    // S'assurer que imageUrl commence par /
+    final cleanUrl = imageUrl.startsWith('/') ? imageUrl : '/$imageUrl';
+    final fullUrl = '$baseUrl$cleanUrl';
+    print('ProjectCard - Building image URL: $fullUrl'); // Debug
+    return fullUrl;
+  }
+
   @override
   Widget build(BuildContext context) {
     final energyColor = _getEnergyColor(energy);
@@ -71,14 +92,55 @@ class ProjectCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: energyColor.withOpacity(0.1),
+                    if (imageUrl != null && imageUrl!.isNotEmpty) ...[
+                      ClipRRect(
                         borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          _buildImageUrl(imageUrl),
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            // Fallback vers l'icône si l'image ne charge pas
+                            return Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: energyColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(energyIcon, color: energyColor, size: 24),
+                            );
+                          },
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: energyColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded / 
+                                      loadingProgress.expectedTotalBytes!
+                                    : null,
+                                strokeWidth: 2,
+                                color: energyColor,
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                      child: Icon(energyIcon, color: energyColor, size: 24),
-                    ),
+                    ] else ...[
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: energyColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(energyIcon, color: energyColor, size: 24),
+                      ),
+                    ],
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(

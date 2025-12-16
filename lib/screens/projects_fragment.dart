@@ -302,6 +302,7 @@ class _ProjectsFragmentState extends State<ProjectsFragment> {
                             progress: project.progress,
                             raisedAmount: project.raisedAmount,
                             targetAmount: project.targetAmount,
+                            imageUrl: project.imageUrl,
                             onTap: () {
                               // Navigation vers la page de détails
                               Navigator.push(

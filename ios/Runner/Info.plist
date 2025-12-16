@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Nous avons besoin d'accéder à votre galerie pour ajouter des images aux projets</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Nous avons besoin d'accéder à votre appareil photo pour prendre des photos de projets</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Nous avons besoin de sauvegarder des images dans votre galerie</string>
 </dict>
 </plist>

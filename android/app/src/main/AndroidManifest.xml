@@ -1,5 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Permissions pour Android 13+ (API 33+) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- Permissions pour Android 12 et inférieur (API 32 et moins) -->
+    <uses-permission 
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <!-- Permission caméra -->
+    <uses-permission android:name="android.permission.CAMERA" />
     <application
         android:label="energies_renouvelables"
         android:name="${applicationName}"

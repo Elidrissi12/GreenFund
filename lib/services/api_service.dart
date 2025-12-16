@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/project.dart';
 
@@ -439,6 +441,75 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Error loading transactions: $e');
+    }
+  }
+
+  // File Upload
+  static Future<String> uploadProjectImage(String projectId, File imageFile) async {
+    try {
+      final token = await _getToken();
+      if (token == null || token.isEmpty) {
+        throw Exception('No authentication token found. Please login again.');
+      }
+
+      final uri = Uri.parse('$baseUrl/files/projects/$projectId/image');
+      
+      var request = http.MultipartRequest('POST', uri);
+      
+      // Ajouter le header d'authentification
+      request.headers['Authorization'] = 'Bearer $token';
+      
+      // Détecter le vrai MIME type avec le package mime
+      final mimeType = lookupMimeType(imageFile.path);
+      if (mimeType == null || !mimeType.startsWith('image/')) {
+        throw Exception('Invalid image file type');
+      }
+      
+      // Extraire le type et sous-type du MIME
+      final mimeTypeData = mimeType.split('/');
+      if (mimeTypeData.length != 2) {
+        throw Exception('Invalid MIME type format');
+      }
+      
+      // Normaliser jpeg -> jpg pour la cohérence
+      String subtype = mimeTypeData[1].toLowerCase();
+      if (subtype == 'jpeg') {
+        subtype = 'jpg';
+      }
+      
+      // Créer le MediaType correct
+      final contentType = MediaType('image', subtype);
+      
+      // Ajouter le fichier avec le bon MIME type
+      var multipartFile = await http.MultipartFile.fromPath(
+        'file',
+        imageFile.path,
+        filename: imageFile.path.split('/').last,
+        contentType: contentType,
+      );
+      request.files.add(multipartFile);
+      
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['imageUrl'] as String;
+      } else {
+        final errorBody = response.body;
+        try {
+          final errorJson = jsonDecode(errorBody);
+          throw Exception(errorJson['message'] ?? 'Failed to upload image');
+        } catch (_) {
+          throw Exception('Failed to upload image: $errorBody');
+        }
+      }
+    } catch (e) {
+      if (e.toString().contains('Invalid image file type') || 
+          e.toString().contains('Invalid MIME type')) {
+        rethrow;
+      }
+      throw Exception('Error uploading image: $e');
     }
   }
 

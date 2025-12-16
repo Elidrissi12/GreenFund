@@ -365,6 +365,7 @@ class _ProjectsList extends StatelessWidget {
               progress: p.progress,
               raisedAmount: p.raisedAmount,
               targetAmount: p.targetAmount,
+              imageUrl: p.imageUrl,
               onTap: () {
                 Navigator.push(
                   context,

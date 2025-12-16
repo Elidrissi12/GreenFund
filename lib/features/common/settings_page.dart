@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../screens/login_screen.dart';
 import '../../theme/colors.dart';
+import '../../theme/styles.dart';
 
 /// Page des paramètres avec déconnexion fonctionnelle.
 class SettingsPage extends StatefulWidget {
@@ -100,20 +101,139 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  Widget _buildHeaderCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: AppColors.primaryGradient,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: AppColors.elevatedShadow,
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(Icons.settings, color: Colors.white, size: 28),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(
+                  'Paramètres GreenFund',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Personnalisez votre expérience et gérez votre compte.',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSwitchTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: AppColors.cardGradient,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: AppColors.cardShadow,
+      ),
+      child: SwitchListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        secondary: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: AppColors.primaryGreen.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: AppColors.primaryGreen),
+        ),
+        title: Text(title, style: AppStyles.titleText),
+        subtitle: Text(
+          subtitle,
+          style: AppStyles.subtitleText.copyWith(color: AppColors.textMedium),
+        ),
+        value: value,
+        activeColor: AppColors.primaryGreen,
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget _buildSettingTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    VoidCallback? onTap,
+    Color iconColor = AppColors.primaryGreen,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: AppColors.cardGradient,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: AppColors.cardShadow,
+      ),
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: iconColor.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: iconColor),
+        ),
+        title: Text(title, style: AppStyles.titleText),
+        subtitle: Text(
+          subtitle,
+          style: AppStyles.subtitleText.copyWith(color: AppColors.textMedium),
+        ),
+        trailing: onTap != null
+            ? const Icon(Icons.chevron_right, color: AppColors.textMedium)
+            : null,
+        onTap: onTap,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text('Paramètres')),
-      body: ListView(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        children: [
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: SwitchListTile(
-              title: const Text('Mode sombre'),
+        child: Column(
+          children: [
+            _buildHeaderCard(),
+            const SizedBox(height: 20),
+            _buildSwitchTile(
+              icon: Icons.dark_mode,
+              title: 'Mode sombre',
+              subtitle: 'Expérience visuelle plus reposante (mock)',
               value: _darkMode,
-              activeColor: AppColors.primaryGreen,
               onChanged: (v) {
                 setState(() => _darkMode = v);
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -124,39 +244,30 @@ class _SettingsPageState extends State<SettingsPage> {
                 );
               },
             ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: ListTile(
-              title: const Text('Langue'),
-              subtitle: Text(_lang == 'FR' ? 'Français' : 'Anglais'),
-              trailing: const Icon(Icons.chevron_right),
+            const SizedBox(height: 12),
+            _buildSettingTile(
+              icon: Icons.language,
+              title: 'Langue',
+              subtitle: _lang == 'FR' ? 'Français' : 'Anglais',
               onTap: _chooseLanguage,
             ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: const ListTile(
-              title: Text('Notifications'),
-              subtitle: Text('À venir'),
+            const SizedBox(height: 12),
+            _buildSettingTile(
+              icon: Icons.notifications_active_outlined,
+              title: 'Notifications',
+              subtitle: 'Personnalisation à venir',
+              onTap: null,
             ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: ListTile(
-              title: const Text('Déconnexion'),
-              subtitle: const Text('Se déconnecter de votre compte'),
-              trailing: const Icon(Icons.logout, color: AppColors.primaryGreen),
+            const SizedBox(height: 20),
+            _buildSettingTile(
+              icon: Icons.logout,
+              title: 'Déconnexion',
+              subtitle: 'Se déconnecter de votre compte',
+              iconColor: AppColors.errorRed,
               onTap: _logout,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
